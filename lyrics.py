@@ -29,13 +29,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write(b"""
-                    <html>
-                    <script>
-                        window.close();
-                    </script>
-                    </html>
-                """)
+                self.wfile.write(b"Authentication successful. You can close this window.")
                 print("Authentication successful ✓")
             else:
                 self.send_response(400)
@@ -62,7 +56,7 @@ def spotify_auth():
     print("Waiting for authentication in the browser...")
 
     server = HTTPServer(('localhost', 5002), SimpleHTTPRequestHandler)
-    server.timeout = 30
+    server.timeout = 50
     server.handle_request()
 
     if not access_token:
@@ -73,12 +67,7 @@ def spotify_auth():
 
     return access_token
 
-if __name__ == "__main__":
-    access_token = spotify_auth()
-
-    sp = spotipy.Spotify(auth=access_token)
-
-    print("Retrieving saved songs...")
+def get_saved_songs(sp):
     saved_songs = []
     offset = 0
     limit = 50
@@ -88,15 +77,29 @@ if __name__ == "__main__":
         if len(results['items']) < limit:
             break
         offset += limit
+    return saved_songs
 
-    print("Getting random lyrics...\n")
+def get_random_lyrics(songs):
     song = None
     while not song:
-        random_track = random.choice(saved_songs)['track']
+        random_track = random.choice(songs)['track']
         artist = random_track['artists'][0]['name']
         name = random_track['name']
 
         genius = lyricsgenius.Genius(tokens.GENIUS_ACCESS_TOKEN, verbose=False)
         song = genius.search_song(name, artist)
 
-    print(song.lyrics)
+    return song.lyrics
+
+if __name__ == "__main__":
+    access_token = spotify_auth()
+
+    sp = spotipy.Spotify(auth=access_token)
+
+    print("Retrieving saved songs...")
+    saved_songs = get_saved_songs(sp)
+
+    print("Getting random lyrics...\n")
+    lyrics = get_random_lyrics(saved_songs)
+
+    print(lyrics)
