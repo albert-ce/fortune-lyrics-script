@@ -65,6 +65,12 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 def spotify_auth():
     global access_token
 
+    token_info = sp_oauth.get_cached_token()
+    if token_info:
+        access_token = token_info['access_token']
+        print("Using cached token ✓")
+        return access_token
+
     auth_url = sp_oauth.get_authorize_url()
 
     webbrowser.open(auth_url)
@@ -78,8 +84,6 @@ def spotify_auth():
         print("Timeout: Authentication was not completed in time.")
 
     server.server_close()
-    print("Server stopped.")
-
     return access_token
 
 def get_saved_songs(sp):
@@ -95,6 +99,8 @@ def get_saved_songs(sp):
     return saved_songs
 
 def get_random_lyrics(songs):
+    global artist
+    global name
     song = None
     while not song:
         random_track = random.choice(songs)['track']
@@ -131,5 +137,6 @@ if __name__ == "__main__":
     lyrics = get_random_lyrics(saved_songs)
 
     verses_pairs = get_verses_pairs(lyrics)
+    verse_pair = random.choice(verses_pairs)
 
-    print(random.choice(verses_pairs))
+    print("\""+verse_pair+"\""+"\n\t\t- "+name+" by "+artist)
