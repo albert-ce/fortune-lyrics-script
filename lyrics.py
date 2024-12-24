@@ -57,13 +57,14 @@ def spotify_auth():
     print("Waiting for authentication in the browser...")
 
     server = HTTPServer(('localhost', 5002), SimpleHTTPRequestHandler)
-    # server.timeout = 10
+    server.timeout = 5
     server.handle_request()
 
-    # if not access_token:
-    #     print("Timeout: Authentication was not completed in time.")
-    #     server.shutdown()
-    #     print("Server stopped.")
+    if not access_token:
+        print("Timeout: Authentication was not completed in time.")
+
+    server.server_close()
+    print("Server stopped.")
 
     return access_token
 
