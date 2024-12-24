@@ -29,8 +29,13 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write(b"Authentication successful. You can close this window.")
-
+                self.wfile.write(b"""
+                    <html>
+                    <script>
+                        window.close();
+                    </script>
+                    </html>
+                """)
                 print("Authentication successful ✓")
             else:
                 self.send_response(400)
@@ -57,7 +62,7 @@ def spotify_auth():
     print("Waiting for authentication in the browser...")
 
     server = HTTPServer(('localhost', 5002), SimpleHTTPRequestHandler)
-    server.timeout = 5
+    server.timeout = 30
     server.handle_request()
 
     if not access_token:
@@ -74,21 +79,24 @@ if __name__ == "__main__":
     sp = spotipy.Spotify(auth=access_token)
 
     print("Retrieving saved songs...")
-    saved_songs = sp.current_user_saved_tracks()
+    saved_songs = []
+    offset = 0
+    limit = 50
+    while True:
+        results = sp.current_user_saved_tracks(limit=limit, offset=offset)
+        saved_songs.extend(results['items'])
+        if len(results['items']) < limit:
+            break
+        offset += limit
 
-    random_track = random.choice(saved_songs['items'])['track']
-    artist = random_track['artists'][0]['name']
-    name = random_track['name']
+    print("Getting random lyrics...\n")
+    song = None
+    while not song:
+        random_track = random.choice(saved_songs)['track']
+        artist = random_track['artists'][0]['name']
+        name = random_track['name']
 
-    # for item in saved_songs['items']:
-    #     track = item['track']
-    #     artist = track['artists'][0]['name']
-    #     name = track['name']
-    #     print(name + " by " + artist)
+        genius = lyricsgenius.Genius(tokens.GENIUS_ACCESS_TOKEN, verbose=False)
+        song = genius.search_song(name, artist)
 
-    # with open("saved_songs.json", "w") as json_file:
-    #     json.dump(results, json_file, indent=4) 
-
-    genius = lyricsgenius.Genius(tokens.GENIUS_ACCESS_TOKEN, verbose=False)
-    song = genius.search_song(name, artist)
     print(song.lyrics)
