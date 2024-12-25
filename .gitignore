@@ -1,0 +1,7 @@
+*
+!.gitignore
+!lyrics.py
+!README.md
+!requirements.txt
+!img/
+!img/*

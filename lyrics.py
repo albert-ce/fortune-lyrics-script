@@ -7,7 +7,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import webbrowser
 import random
-import json
+import sys
 import re
 
 
@@ -115,9 +115,12 @@ def get_random_lyrics(songs):
     return song.lyrics
 
 def get_fortune_verses(lyrics, n_verses=2):
-    strophes = lyrics.split('\n\n')
-    strophes_cleaned = [re.sub('\[.*\]\n*|\n*\(.*\)','',strophe) for strophe in strophes[1:]]
-    strophes_verses = [strophe.split('\n') for strophe in strophes_cleaned]
+    # Remove single-line [section labels] and (chorus)
+    lyrics = re.sub('^[\[\(].*[\]\)]$\n','',lyrics)
+    # Remove inline [section labels] and (chorus)
+    lyrics_cleaned = re.sub('\s*[\[\(].*[\]\)]','',lyrics)
+    strophes = lyrics_cleaned.split('\n\n')
+    strophes_verses = [strophe.split('\n') for strophe in strophes]
 
     verses_pairs = []
     for verses in strophes_verses:
@@ -147,6 +150,13 @@ def print_verses(verses, name, artist):
     print_boxed(verses+"\n"+reference)
 
 if __name__ == "__main__":
+    n_verses = 2
+    if len(sys.argv) > 1:
+        try:
+            n_verses = int(sys.argv[1])
+        except ValueError:
+            print("The argument is not a valid integer, using default value.")
+
     access_token = spotify_auth()
     sp = spotipy.Spotify(auth=access_token)
 
@@ -158,8 +168,9 @@ if __name__ == "__main__":
     fortune_verses = []
     while not fortune_verses:
         lyrics = get_random_lyrics(saved_songs)
-        fortune_verses = get_fortune_verses(lyrics, 2)
-        verses = random.choice(fortune_verses)
+        fortune_verses = get_fortune_verses(lyrics, n_verses=n_verses)
+
+    verses = random.choice(fortune_verses)
 
     spinner.stop()
 
