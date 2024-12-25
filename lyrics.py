@@ -1,6 +1,8 @@
 import tokens
 import lyricsgenius
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from yaspin import yaspin
+from yaspin.spinners import Spinners
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import webbrowser
@@ -112,31 +114,54 @@ def get_random_lyrics(songs):
 
     return song.lyrics
 
-def get_verses_pairs(lyrics):
+def get_fortune_verses(lyrics, n_verses=2):
     strophes = lyrics.split('\n\n')
-    strophes_cleaned = [re.sub('\[.*\]\n|\(.*\)','',strophe) for strophe in strophes[1:]]
+    strophes_cleaned = [re.sub('\[.*\]\n*|\n*\(.*\)','',strophe) for strophe in strophes[1:]]
     strophes_verses = [strophe.split('\n') for strophe in strophes_cleaned]
 
     verses_pairs = []
     for verses in strophes_verses:
-        for i in range(0, len(verses) - 1, 2):
-            verses_pair = '\n'.join([verses[i], verses[i+1]])
+        for i in range(0, len(verses) - 1, n_verses):
+            verses_pair = '\n'.join(verses[i:i+n_verses])
             verses_pairs.append(verses_pair)
 
     return verses_pairs
 
+def print_boxed(string):
+    lines = string.split('\n')
+    lines = [line.expandtabs(4) for line in lines]
+    max_length = max(len(line) for line in lines)
+    print('┌' + '─' * (max_length + 2) + '┐')
+    for line in lines:
+        print(f'│ {line.ljust(max_length)} │')
+    print('└' + '─' * (max_length + 2) + '┘')
+
+def print_verses(verses, name, artist):
+    verses = "\""+verses+"\""
+    reference = "- "+name+" by "+artist
+
+    max_length = max(len(line) for line in verses.split('\n'))
+    spaces = max(0, max_length-len(reference))
+    reference = " "*spaces+reference
+
+    print_boxed(verses+"\n"+reference)
+
 if __name__ == "__main__":
     access_token = spotify_auth()
-
     sp = spotipy.Spotify(auth=access_token)
 
-    print("Retrieving saved songs...")
+    spinner = yaspin(Spinners.arc, text="🥠")
+    spinner.start()
+
     saved_songs = get_saved_songs(sp)
 
-    print("Getting random lyrics...\n")
-    lyrics = get_random_lyrics(saved_songs)
+    fortune_verses = []
+    while not fortune_verses:
+        lyrics = get_random_lyrics(saved_songs)
+        fortune_verses = get_fortune_verses(lyrics, 2)
+        verses = random.choice(fortune_verses)
 
-    verses_pairs = get_verses_pairs(lyrics)
-    verse_pair = random.choice(verses_pairs)
+    spinner.stop()
 
-    print("\""+verse_pair+"\""+"\n\t\t- "+name+" by "+artist)
+    print("🥠 Finished ✓")
+    print_verses(verses, name, artist)
