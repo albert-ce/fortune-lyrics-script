@@ -115,10 +115,11 @@ def get_random_lyrics(songs):
     return song.lyrics
 
 def get_fortune_verses(lyrics, n_verses=2):
-    # Remove single-line [section labels] and (chorus)
-    lyrics = re.sub('^[\[\(].*[\]\)]$\n','',lyrics)
-    # Remove inline [section labels] and (chorus)
-    lyrics_cleaned = re.sub('\s*[\[\(].*[\]\)]','',lyrics)
+    # Remove [section labels] and (chorus)
+    lyrics = re.sub(' *[\[\(].*?[\]\)]','',lyrics)
+    lyrics = re.sub('\n\n+','\n\n',lyrics)
+    lyrics_cleaned = lyrics.strip()
+
     strophes = lyrics_cleaned.split('\n\n')
     strophes_verses = [strophe.split('\n') for strophe in strophes]
 
