@@ -30,7 +30,7 @@ pip install -r requirements.txt
 > [!WARNING] 
 > The script requires Spotify and Genius API tokens to work. Follow the instructions below to generate and configure them.
 #### Spotify
-1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications) and create an application.
+1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications) and create an application. Make sure to mark the Web API checkbox in the application settings.
 2. Note your **Client ID** and **Client Secret**.
 3. Set the redirect URI to `http://localhost:5002/spotify-auth` in the application settings.
 4. Save the `CLIENT_ID` and `CLIENT_SECRET` in a file named `tokens.py`:
