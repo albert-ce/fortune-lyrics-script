@@ -1,8 +1,12 @@
 ![Fortune Lyrics Banner](img/fortune_lyrics.png)
 
-# Fortune Lyrics: Turn Your Favorite Songs into Fortune Cookies
+# Fortune Lyrics (*Script*): Turn your favorite songs into fortune cookies
 
-**Fortune Lyrics** is a Python script that fetches random lyrics from your saved songs on Spotify and presents them as a "fortune cookie" message. It combines Spotify’s saved tracks feature with Genius’s lyrics API to deliver snippets of your favorite music.
+**Fortune Lyrics (*Script*)** is a Python script that fetches random lyrics from your saved songs on Spotify and presents them as a "fortune cookie" message. It combines Spotify’s saved tracks feature with Genius’s lyrics API to deliver snippets of your favorite music.
+
+> [!NOTE]  
+> This repository contains the original version of Fortune Lyrics, created as a project for personal use. A new web-based version with a graphical interface is currently under development, keeping the same functionality.
+
 
 ## Features
 - Retrieves saved tracks from your Spotify library.
